@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await getSupabase().storage
       .from("uploads")
       .upload(storagePath, buffer, {
         contentType: file.type,
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = getSupabase().storage
       .from("uploads")
       .getPublicUrl(storagePath);
 

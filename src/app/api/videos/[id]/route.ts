@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -35,7 +35,7 @@ export async function DELETE(
       const bucketIndex = pathParts.indexOf("uploads");
       if (bucketIndex !== -1) {
         const storagePath = pathParts.slice(bucketIndex + 1).join("/");
-        await supabase.storage.from("uploads").remove([storagePath]);
+        await getSupabase().storage.from("uploads").remove([storagePath]);
       }
     }
     await prisma.video.delete({ where: { id } });
