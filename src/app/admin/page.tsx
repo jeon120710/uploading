@@ -10,6 +10,7 @@ import {
   Clock,
   AlertCircle,
 } from "lucide-react";
+import { AdminGuard } from "@/components/AdminGuard";
 
 interface VideoItem {
   id: string;
@@ -85,6 +86,7 @@ export default function AdminPage() {
   };
 
   return (
+    <AdminGuard>
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">관리자 콘솔</h1>
@@ -313,6 +315,7 @@ export default function AdminPage() {
         </div>
       </div>
     </div>
+    </AdminGuard>
   );
 }
 
