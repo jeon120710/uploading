@@ -2,6 +2,8 @@ import Link from "next/link";
 import { BookOpen, Video, ArrowRight, Sparkles, TrendingUp } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [recentNovels, recentVideos, novelCount, videoCount] = await Promise.all([
     prisma.novel.findMany({ orderBy: { createdAt: "desc" }, take: 4 }),

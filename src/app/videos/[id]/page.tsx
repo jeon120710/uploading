@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { Video, ArrowLeft, Eye, Clock, Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function VideoDetailPage({
   params,
 }: {

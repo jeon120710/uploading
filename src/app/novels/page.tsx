@@ -2,6 +2,8 @@ import Link from "next/link";
 import { BookOpen, Plus } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function NovelsPage() {
   const novels = await prisma.novel.findMany({
     orderBy: { createdAt: "desc" },
