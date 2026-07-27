@@ -4,36 +4,44 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+async function getVideosAndPeople(personFilter?: string) {
+  try {
+    const [videos, allPeople] = await Promise.all([
+      prisma.video.findMany({
+        orderBy: { createdAt: "desc" },
+        include: {
+          people: { include: { person: true } },
+        },
+        ...(personFilter
+          ? {
+              where: {
+                people: {
+                  some: {
+                    person: { name: personFilter },
+                  },
+                },
+              },
+            }
+          : {}),
+      }),
+      prisma.person.findMany({
+        include: { _count: { select: { videos: true } } },
+        orderBy: { name: "asc" },
+      }),
+    ]);
+    return { videos, allPeople };
+  } catch {
+    return { videos: [], allPeople: [] };
+  }
+}
+
 export default async function VideosPage({
   searchParams,
 }: {
   searchParams: Promise<{ person?: string }>;
 }) {
   const { person: personFilter } = await searchParams;
-
-  const [videos, allPeople] = await Promise.all([
-    prisma.video.findMany({
-      orderBy: { createdAt: "desc" },
-      include: {
-        people: { include: { person: true } },
-      },
-      ...(personFilter
-        ? {
-            where: {
-              people: {
-                some: {
-                  person: { name: personFilter },
-                },
-              },
-            },
-          }
-        : {}),
-    }),
-    prisma.person.findMany({
-      include: { _count: { select: { videos: true } } },
-      orderBy: { name: "asc" },
-    }),
-  ]);
+  const { videos, allPeople } = await getVideosAndPeople(personFilter);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -4,17 +4,26 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+async function getData() {
+  try {
+    const [recentNovels, recentVideos, novelCount, videoCount] = await Promise.all([
+      prisma.novel.findMany({ orderBy: { createdAt: "desc" }, take: 4 }),
+      prisma.video.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 4,
+        include: { people: { include: { person: true } } },
+      }),
+      prisma.novel.count(),
+      prisma.video.count(),
+    ]);
+    return { recentNovels, recentVideos, novelCount, videoCount };
+  } catch {
+    return { recentNovels: [], recentVideos: [], novelCount: 0, videoCount: 0 };
+  }
+}
+
 export default async function HomePage() {
-  const [recentNovels, recentVideos, novelCount, videoCount] = await Promise.all([
-    prisma.novel.findMany({ orderBy: { createdAt: "desc" }, take: 4 }),
-    prisma.video.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 4,
-      include: { people: { include: { person: true } } },
-    }),
-    prisma.novel.count(),
-    prisma.video.count(),
-  ]);
+  const { recentNovels, recentVideos, novelCount, videoCount } = await getData();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

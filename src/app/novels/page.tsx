@@ -4,10 +4,18 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+async function getNovels() {
+  try {
+    return await prisma.novel.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+  } catch {
+    return [];
+  }
+}
+
 export default async function NovelsPage() {
-  const novels = await prisma.novel.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+  const novels = await getNovels();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
