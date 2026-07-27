@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Novel {
+  id          String   @id @default(cuid())
+  title       String
+  author      String
+  description String?
+  content     String
+  coverImage  String?
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Video {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  url         String
+  thumbnail   String?
+  duration    String?
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  people      VideoPerson[]
+}
+
+model Person {
+  id    String @id @default(cuid())
+  name  String @unique
+  image String?
+  videos VideoPerson[]
+}
+
+model VideoPerson {
+  id       String @id @default(cuid())
+  videoId  String
+  personId String
+  video    Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  person   Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([videoId, personId])
+}
