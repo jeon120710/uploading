@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { unlink } from "fs/promises";
+import path from "path";
 
 export async function GET(
   _request: Request,
@@ -27,6 +29,11 @@ export async function DELETE(
   const { id } = await params;
 
   try {
+    const video = await prisma.video.findUnique({ where: { id } });
+    if (video) {
+      const filePath = path.join(process.cwd(), "public", video.filePath);
+      await unlink(filePath).catch(() => {});
+    }
     await prisma.video.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch {

@@ -23,7 +23,10 @@ model Video {
   id          String   @id @default(cuid())
   title       String
   description String?
-  url         String
+  filePath    String
+  fileName    String
+  fileSize    Int?
+  mimeType    String?
   thumbnail   String?
   duration    String?
   viewCount   Int      @default(0)

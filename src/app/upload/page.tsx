@@ -1,14 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, Video, Plus, X, Loader2, Check } from "lucide-react";
+import {
+  BookOpen,
+  Video,
+  Plus,
+  X,
+  Loader2,
+  Check,
+  Upload,
+  FileVideo,
+} from "lucide-react";
 
 export default function UploadPage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [type, setType] = useState<"novel" | "video">("novel");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
   // Novel fields
   const [novelTitle, setNovelTitle] = useState("");
@@ -19,7 +31,6 @@ export default function UploadPage() {
   // Video fields
   const [videoTitle, setVideoTitle] = useState("");
   const [videoDesc, setVideoDesc] = useState("");
-  const [videoUrl, setVideoUrl] = useState("");
   const [videoDuration, setVideoDuration] = useState("");
   const [people, setPeople] = useState<string[]>([]);
   const [personInput, setPersonInput] = useState("");
@@ -34,6 +45,15 @@ export default function UploadPage() {
 
   const removePerson = (name: string) => {
     setPeople(people.filter((p) => p !== name));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const url = URL.createObjectURL(file);
+      setPreview(url);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,16 +77,22 @@ export default function UploadPage() {
         setSuccess(true);
         setTimeout(() => router.push(`/novels/${data.id}`), 1000);
       } else {
+        if (!selectedFile) {
+          alert("비디오 파일을 선택해주세요.");
+          setLoading(false);
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("title", videoTitle);
+        formData.append("description", videoDesc || "");
+        formData.append("video", selectedFile);
+        formData.append("duration", videoDuration || "");
+        formData.append("people", JSON.stringify(people));
+
         const res = await fetch("/api/videos", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: videoTitle,
-            description: videoDesc || undefined,
-            url: videoUrl,
-            duration: videoDuration || undefined,
-            people,
-          }),
+          body: formData,
         });
         if (!res.ok) throw new Error("Failed");
         const data = await res.json();
@@ -154,9 +180,7 @@ export default function UploadPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">
-                설명
-              </label>
+              <label className="block text-sm font-semibold mb-2">설명</label>
               <input
                 type="text"
                 value={novelDesc}
@@ -197,26 +221,76 @@ export default function UploadPage() {
                 className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all"
               />
             </div>
+
+            {/* Video File Upload */}
             <div>
               <label className="block text-sm font-semibold mb-2">
-                영상 URL <span className="text-red-500">*</span>
+                비디오 파일 <span className="text-red-500">*</span>
               </label>
               <input
-                type="url"
-                required
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                placeholder="https://youtube.com/watch?v=..."
-                className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all"
+                type="file"
+                ref={fileInputRef}
+                accept="video/*"
+                onChange={handleFileChange}
+                className="hidden"
               />
-              <p className="text-xs text-muted mt-1">
-                YouTube, Vimeo 등의 링크를 입력하세요
-              </p>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className={`w-full p-8 border-2 border-dashed rounded-2xl transition-all ${
+                  selectedFile
+                    ? "border-accent bg-accent/5"
+                    : "border-border hover:border-accent/50 hover:bg-accent/5"
+                }`}
+              >
+                {selectedFile ? (
+                  <div className="flex flex-col items-center gap-3">
+                    <FileVideo className="w-12 h-12 text-accent" />
+                    <div className="text-center">
+                      <p className="font-semibold">{selectedFile.name}</p>
+                      <p className="text-sm text-muted">
+                        {(selectedFile.size / 1024 / 1024).toFixed(1)} MB
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedFile(null);
+                        setPreview(null);
+                        if (fileInputRef.current)
+                          fileInputRef.current.value = "";
+                      }}
+                      className="text-sm text-red-500 hover:text-red-700"
+                    >
+                      파일 제거
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-3">
+                    <Upload className="w-12 h-12 text-muted" />
+                    <div className="text-center">
+                      <p className="font-semibold">비디오 파일을 선택하세요</p>
+                      <p className="text-sm text-muted">
+                        MP4, WebM, MOV 등 (최대 권장: 500MB)
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </button>
+              {preview && selectedFile?.type.startsWith("video/") && (
+                <div className="mt-4">
+                  <video
+                    src={preview}
+                    controls
+                    className="w-full rounded-xl aspect-video bg-black"
+                  />
+                </div>
+              )}
             </div>
+
             <div>
-              <label className="block text-sm font-semibold mb-2">
-                설명
-              </label>
+              <label className="block text-sm font-semibold mb-2">설명</label>
               <input
                 type="text"
                 value={videoDesc}

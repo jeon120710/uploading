@@ -36,28 +36,16 @@ export default async function VideoDetailPage({
       </Link>
 
       <article className="bg-card rounded-3xl border border-border overflow-hidden shadow-xl">
-        {/* Video Player Area */}
-        <div className="aspect-video bg-gradient-to-br from-accent/20 via-amber-50 to-primary/10 flex items-center justify-center relative">
-          {video.url.includes("youtube.com") || video.url.includes("youtu.be") ? (
-            <iframe
-              src={video.url.replace("watch?v=", "embed/")}
-              className="absolute inset-0 w-full h-full rounded-t-3xl"
-              allowFullScreen
-              title={video.title}
-            />
-          ) : (
-            <div className="text-center">
-              <Video className="w-20 h-20 text-accent/30 mx-auto mb-4" />
-              <a
-                href={video.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline text-sm"
-              >
-                외부 링크에서 시청하기 →
-              </a>
-            </div>
-          )}
+        {/* Video Player */}
+        <div className="bg-black">
+          <video
+            src={video.filePath}
+            controls
+            className="w-full aspect-video"
+            poster={video.thumbnail || undefined}
+          >
+            브라우저가 비디오 재생을 지원하지 않습니다.
+          </video>
         </div>
 
         <div className="p-6 sm:p-8">
@@ -74,6 +62,9 @@ export default async function VideoDetailPage({
             </span>
             {video.duration && (
               <span className="font-mono">{video.duration}</span>
+            )}
+            {video.fileSize && (
+              <span>{(video.fileSize / 1024 / 1024).toFixed(1)} MB</span>
             )}
           </div>
 
@@ -107,15 +98,10 @@ export default async function VideoDetailPage({
             </div>
           )}
 
-          <a
-            href={video.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-accent to-amber-600 text-white rounded-xl font-semibold shadow-lg shadow-accent/25 hover:shadow-accent/40 transition-all hover:scale-105"
-          >
-            <Video className="w-4 h-4" />
-            원본 보기
-          </a>
+          <div className="flex items-center gap-3 text-xs text-muted">
+            <span>파일: {video.fileName}</span>
+            <span>타입: {video.mimeType}</span>
+          </div>
         </div>
       </article>
     </div>

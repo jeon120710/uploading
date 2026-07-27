@@ -146,11 +146,17 @@ export default async function HomePage() {
                 href={`/videos/${video.id}`}
                 className="group bg-card rounded-2xl border border-border overflow-hidden hover:shadow-xl hover:border-accent/20 transition-all duration-300 card-shine"
               >
-                <div className="aspect-video bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center relative">
-                  <Video className="w-12 h-12 text-accent/40 group-hover:text-accent/60 transition-colors" />
-                  {video.duration && (
+                <div className="aspect-video bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center relative overflow-hidden">
+                  <video
+                    src={video.filePath}
+                    className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity"
+                    muted
+                    preload="metadata"
+                  />
+                  <Video className="w-12 h-12 text-accent/40 group-hover:text-accent/60 transition-colors relative z-10" />
+                  {video.fileSize && (
                     <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded-md">
-                      {video.duration}
+                      {(video.fileSize / 1024 / 1024).toFixed(0)} MB
                     </span>
                   )}
                 </div>
