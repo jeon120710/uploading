@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
-import { unlink } from "fs/promises";
-import path from "path";
 
 export async function GET(
   _request: Request,
@@ -31,8 +30,13 @@ export async function DELETE(
   try {
     const video = await prisma.video.findUnique({ where: { id } });
     if (video) {
-      const filePath = path.join(process.cwd(), "public", video.filePath);
-      await unlink(filePath).catch(() => {});
+      const url = new URL(video.filePath);
+      const pathParts = url.pathname.split("/");
+      const bucketIndex = pathParts.indexOf("uploads");
+      if (bucketIndex !== -1) {
+        const storagePath = pathParts.slice(bucketIndex + 1).join("/");
+        await supabase.storage.from("uploads").remove([storagePath]);
+      }
     }
     await prisma.video.delete({ where: { id } });
     return NextResponse.json({ success: true });

@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 
 export async function GET() {
   const videos = await prisma.video.findMany({
@@ -29,19 +28,33 @@ export async function POST(request: Request) {
     );
   }
 
+  const ext = file.name.split(".").pop() || "mp4";
+  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const filePath = `videos/${fileName}`;
+
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "videos");
-  await mkdir(uploadDir, { recursive: true });
+  const { error: uploadError } = await supabase.storage
+    .from("uploads")
+    .upload(filePath, buffer, {
+      contentType: file.type,
+      upsert: false,
+    });
 
-  const ext = path.extname(file.name) || ".mp4";
-  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
-  const filePath = path.join(uploadDir, fileName);
+  if (uploadError) {
+    console.error("Upload error:", uploadError);
+    return NextResponse.json(
+      { error: "파일 업로드에 실패했습니다." },
+      { status: 500 }
+    );
+  }
 
-  await writeFile(filePath, buffer);
+  const { data: urlData } = supabase.storage
+    .from("uploads")
+    .getPublicUrl(filePath);
 
-  const publicPath = `/uploads/videos/${fileName}`;
+  const publicUrl = urlData.publicUrl;
 
   const parsedPeople = peopleNames ? JSON.parse(peopleNames) : [];
 
@@ -49,7 +62,7 @@ export async function POST(request: Request) {
     data: {
       title,
       description: description || undefined,
-      filePath: publicPath,
+      filePath: publicUrl,
       fileName: file.name,
       fileSize: file.size,
       mimeType: file.type,
