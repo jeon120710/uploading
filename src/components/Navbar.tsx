@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Video, Home, Upload } from "lucide-react";
+import { BookOpen, Video, Home, Upload, Settings } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "홈", icon: Home },
@@ -51,6 +51,17 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <Link
+              href="/admin"
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                pathname === "/admin"
+                  ? "bg-foreground/10 text-foreground"
+                  : "text-foreground/40 hover:text-foreground/70 hover:bg-foreground/5"
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">관리</span>
+            </Link>
             <Link
               href="/upload"
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark text-white text-sm font-medium shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-200 hover:scale-105"
