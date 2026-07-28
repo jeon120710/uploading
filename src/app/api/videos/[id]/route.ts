@@ -44,3 +44,22 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 }
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const { title } = await request.json();
+
+  try {
+    const video = await prisma.video.update({
+      where: { id },
+      data: { title },
+    });
+    return NextResponse.json(video);
+  } catch {
+    return NextResponse.json({ error: "Failed to update" }, { status: 500 });
+  }
+}
+

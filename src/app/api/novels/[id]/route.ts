@@ -28,3 +28,22 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 }
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const { title, author } = await request.json();
+
+  try {
+    const novel = await prisma.novel.update({
+      where: { id },
+      data: { title, author },
+    });
+    return NextResponse.json(novel);
+  } catch {
+    return NextResponse.json({ error: "Failed to update" }, { status: 500 });
+  }
+}
+

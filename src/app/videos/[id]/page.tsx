@@ -15,6 +15,7 @@ export default async function VideoDetailPage({
     where: { id },
     include: {
       people: { include: { person: true } },
+      uploader: true,
     },
   });
 
@@ -52,6 +53,11 @@ export default async function VideoDetailPage({
           <h1 className="text-3xl font-bold mb-2">{video.title}</h1>
 
           <div className="flex items-center gap-4 text-sm text-muted mb-6 pb-6 border-b border-border">
+            {video.uploader && (
+              <span className="font-medium text-foreground">
+                게시자: {video.uploader.name}
+              </span>
+            )}
             <span className="flex items-center gap-1">
               <Clock className="w-4 h-4" />
               {new Date(video.createdAt).toLocaleDateString("ko-KR")}
@@ -107,3 +113,4 @@ export default async function VideoDetailPage({
     </div>
   );
 }
+

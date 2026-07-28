@@ -9,6 +9,8 @@ import {
   Eye,
   Clock,
   AlertCircle,
+  Save,
+  Edit2,
 } from "lucide-react";
 import { AdminGuard } from "@/components/AdminGuard";
 
@@ -42,6 +44,8 @@ export default function AdminPage() {
   const [novels, setNovels] = useState<NovelItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<VideoItem | NovelItem | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ title: "", author: "" });
 
   const fetchData = async () => {
     setLoading(true);
@@ -58,6 +62,32 @@ export default function AdminPage() {
       alert("데이터를 불러오지 못했습니다.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const startEdit = (item: VideoItem | NovelItem) => {
+    setIsEditing(true);
+    setEditForm({
+      title: item.title,
+      author: "author" in item ? item.author : "",
+    });
+  };
+
+  const handleSave = async () => {
+    if (!selectedItem) return;
+    const type = "filePath" in selectedItem ? "videos" : "novels";
+    try {
+      const res = await fetch(`/api/${type}/${selectedItem.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
+      if (!res.ok) throw new Error("Failed");
+      setIsEditing(false);
+      setSelectedItem(null);
+      fetchData();
+    } catch {
+      alert("수정에 실패했습니다.");
     }
   };
 
@@ -102,7 +132,7 @@ export default function AdminPage() {
       {/* Tabs */}
       <div className="flex gap-2 mb-6 p-1 bg-card rounded-2xl border border-border">
         <button
-          onClick={() => { setActiveTab("videos"); setSelectedItem(null); }}
+          onClick={() => { setActiveTab("videos"); setSelectedItem(null); setIsEditing(false); }}
           className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all ${
             activeTab === "videos"
               ? "bg-accent text-white shadow-lg shadow-accent/25"
@@ -113,7 +143,7 @@ export default function AdminPage() {
           영상 ({videos.length})
         </button>
         <button
-          onClick={() => { setActiveTab("novels"); setSelectedItem(null); }}
+          onClick={() => { setActiveTab("novels"); setSelectedItem(null); setIsEditing(false); }}
           className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all ${
             activeTab === "novels"
               ? "bg-primary text-white shadow-lg shadow-primary/25"
@@ -137,7 +167,7 @@ export default function AdminPage() {
               videos.map((v) => (
                 <button
                   key={v.id}
-                  onClick={() => setSelectedItem(v)}
+                  onClick={() => { setSelectedItem(v); setIsEditing(false); }}
                   className={`w-full text-left p-4 rounded-xl border transition-all ${
                     selectedItem?.id === v.id
                       ? "border-accent bg-accent/5"
@@ -182,7 +212,7 @@ export default function AdminPage() {
             novels.map((n) => (
               <button
                 key={n.id}
-                onClick={() => setSelectedItem(n)}
+                onClick={() => { setSelectedItem(n); setIsEditing(false); }}
                 className={`w-full text-left p-4 rounded-xl border transition-all ${
                   selectedItem?.id === n.id
                     ? "border-primary bg-primary/5"
@@ -220,13 +250,30 @@ export default function AdminPage() {
             <div className="bg-card rounded-2xl border border-border p-6 sticky top-24 animate-slide-up">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold">상세 정보</h2>
-                <button
-                  onClick={() => setSelectedItem(null)}
-                  className="text-xs text-muted hover:text-foreground"
-                >
-                  닫기
-                </button>
-              </div>
+                <div className="flex gap-2">
+                  {!isEditing ? (
+                    <button
+                      onClick={() => startEdit(selectedItem)}
+                      className="text-xs text-muted hover:text-foreground"
+                    >
+                      <Edit2 className="w-4 h-4" />
+              </button>
+                  ) : (
+                    <button
+                      onClick={handleSave}
+                      className="text-xs text-accent hover:text-accent/80 font-bold"
+                    >
+                      저장
+                    </button>
+          )}
+                  <button
+                    onClick={() => { setSelectedItem(null); setIsEditing(false); }}
+                    className="text-xs text-muted hover:text-foreground"
+                  >
+                    닫기
+                  </button>
+        </div>
+      </div>
 
               {"filePath" in selectedItem ? (
                 // Video detail
@@ -239,7 +286,20 @@ export default function AdminPage() {
                     />
                   </div>
                   <div className="space-y-3">
-                    <DetailRow label="제목" value={selectedItem.title} />
+                    {isEditing ? (
+                      <div className="space-y-3">
+    <div>
+                          <p className="text-xs text-muted mb-1">제목</p>
+                          <input
+                            className="w-full bg-background border border-border rounded px-2 py-1 text-sm"
+                            value={editForm.title}
+                            onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                          />
+    </div>
+                      </div>
+                    ) : (
+                      <DetailRow label="제목" value={selectedItem.title} />
+                    )}
                     <DetailRow label="파일명" value={selectedItem.fileName} />
                     <DetailRow label="설명" value={selectedItem.description || "-"} />
                     <DetailRow label="크기" value={formatSize(selectedItem.fileSize)} />
@@ -274,8 +334,31 @@ export default function AdminPage() {
                 // Novel detail
                 <>
                   <div className="space-y-3">
-                    <DetailRow label="제목" value={selectedItem.title} />
-                    <DetailRow label="작가" value={selectedItem.author} />
+                    {isEditing ? (
+                      <>
+                        <div>
+                          <p className="text-xs text-muted mb-1">제목</p>
+                          <input
+                            className="w-full bg-background border border-border rounded px-2 py-1 text-sm"
+                            value={editForm.title}
+                            onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted mb-1">작가</p>
+                          <input
+                            className="w-full bg-background border border-border rounded px-2 py-1 text-sm"
+                            value={editForm.author}
+                            onChange={(e) => setEditForm({ ...editForm, author: e.target.value })}
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <DetailRow label="제목" value={selectedItem.title} />
+                        <DetailRow label="작가" value={selectedItem.author} />
+                      </>
+                    )}
                     <DetailRow label="설명" value={selectedItem.description || "-"} />
                     <DetailRow label="글자수" value={`${selectedItem.content.length.toLocaleString()} 자`} />
                     <DetailRow label="조회수" value={`${selectedItem.viewCount}회`} />
@@ -327,3 +410,4 @@ function DetailRow({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
