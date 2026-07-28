@@ -9,19 +9,27 @@ export function AiNovelGenerator() {
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
 
-  const generate = async () => {
+  const generate = async (isFollowUp = false) => {
     if (!user) return alert("로그인이 필요합니다.");
     setLoading(true);
     try {
+      const currentMessages = isFollowUp
+        ? [...messages, { role: "user", content: prompt }]
+        : [{ role: "user", content: prompt }];
+
       const res = await fetch("/api/ai/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ messages: currentMessages }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setResult(data.content);
+      const newResult = data.content;
+      setResult(newResult);
+      setMessages([...currentMessages, { role: "assistant", content: newResult }]);
+      if (!isFollowUp) setPrompt("");
     } catch (err: any) {
       alert(err.message);
     } finally {
@@ -29,30 +37,54 @@ export function AiNovelGenerator() {
     }
   };
 
+  const uploadNovel = async () => {
+    if (!result) return;
+    const title = prompt.slice(0, 20) || "AI 생성 소설";
+    const res = await fetch("/api/novels", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, content: result, description: "AI로 생성된 소설" }),
+    });
+    if (res.ok) alert("업로드 완료!");
+    else alert("업로드 실패");
+  };
+
   return (
     <div className="bg-card border border-border rounded-3xl p-8 shadow-xl">
       <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
         <Sparkles className="text-accent" />
-        AI 판타지 소설 생성기
+        AI 판타지 소설 공방
       </h2>
-      <textarea
-        className="w-full h-32 p-4 bg-background border border-border rounded-xl focus:ring-2 focus:ring-accent mb-4"
-        placeholder="어떤 이야기를 시작할까요? (예: 검은 성에서 깨어난 기억을 잃은 소년...)"
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-      />
-      <button
-        onClick={generate}
-        disabled={loading}
-        className="w-full py-3 bg-accent text-white rounded-xl font-bold hover:bg-accent/90 transition-all flex items-center justify-center gap-2"
-      >
-        {loading ? <Loader2 className="animate-spin" /> : <><Sparkles className="w-4 h-4" /> 생성하기</>}
-      </button>
       {result && (
-        <div className="mt-8 p-6 bg-background rounded-xl border border-accent/20 whitespace-pre-wrap text-sm leading-relaxed text-muted">
+        <div className="mb-6 p-6 bg-background rounded-xl border border-accent/20 whitespace-pre-wrap text-sm leading-relaxed text-muted max-h-96 overflow-y-auto">
           {result}
         </div>
       )}
+
+      <textarea
+        className="w-full h-24 p-4 bg-background border border-border rounded-xl focus:ring-2 focus:ring-accent mb-4"
+        placeholder={result ? "이어질 내용을 입력하세요..." : "이야기를 시작하세요..."}
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+      />
+      <div className="flex gap-2">
+        <button
+          onClick={() => generate(!!result)}
+          disabled={loading}
+          className="flex-1 py-3 bg-accent text-white rounded-xl font-bold hover:bg-accent/90 transition-all flex items-center justify-center gap-2"
+        >
+          {loading ? <Loader2 className="animate-spin" /> : <>{result ? "이어 쓰기" : "생성하기"}</>}
+        </button>
+        {result && (
+          <button
+            onClick={uploadNovel}
+            className="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-all"
+          >
+            업로드
+          </button>
+        )}
+      </div>
     </div>
   );
 }
+

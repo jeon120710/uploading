@@ -1,8 +1,6 @@
 import Link from "next/link";
-import { BookOpen, Plus, Sparkles } from "lucide-react";
+import { BookOpen, Plus } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { AiNovelGenerator } from "@/components/AiNovelGenerator";
-
 export const dynamic = "force-dynamic";
 
 async function getNovels() {
@@ -40,10 +38,6 @@ export default async function NovelsPage() {
         </Link>
       </div>
           </div>
-
-      <div className="mb-12">
-        <AiNovelGenerator />
-        </div>
 
       {novels.length === 0 ? (
         <div className="text-center py-20 animate-fade-in">

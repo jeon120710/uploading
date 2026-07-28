@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Video, Home, Upload, Settings, LogIn, UserPlus, LogOut, User } from "lucide-react";
+import { BookOpen, Video, Home, Upload, Settings, LogIn, UserPlus, LogOut, User, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { href: "/", label: "홈", icon: Home },
   { href: "/novels", label: "소설", icon: BookOpen },
   { href: "/videos", label: "영상", icon: Video },
+  { href: "/ai-generator", label: "AI 생성", icon: Sparkles },
 ];
 
 export function Navbar() {
@@ -114,3 +115,4 @@ export function Navbar() {
     </header>
   );
 }
+

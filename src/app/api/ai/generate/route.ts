@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { prompt } = await request.json();
+  const { prompt, messages } = await request.json();
   const user = await prisma.user.findUnique({ where: { id: session.user.id } });
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
@@ -25,13 +25,13 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         model: "nvidia/nemotron-3-nano-30b-a3b",
-        messages: [{
-          role: "system",
-          content: "당신은 판타지 세계관과 중2병 감성을 전문으로 하는 소설가입니다. 독창적인 스킬 시스템, 상태창 메시지, 흑염룡과 같은 중2병스러운 설정들을 적절히 섞어 몰입감 넘치는 소설의 한 장면을 작성하세요. 매우 아름답고 신비로운 분위기를 유지하세요."
-        }, {
-          role: "user",
-          content: prompt
-        }],
+        messages: [
+          {
+            role: "system",
+            content: "당신은 판타지 세계관과 중2병 감성을 전문으로 하는 소설가입니다. 독창적인 스킬 시스템, 상태창 메시지, 흑염룡과 같은 중2병스러운 설정들을 적절히 섞어 몰입감 넘치는 소설의 한 장면을 작성하세요. 매우 아름답고 신비로운 분위기를 유지하세요."
+          },
+          ...messages
+        ],
         temperature: 0.7,
         max_tokens: 1024,
       }),
@@ -50,3 +50,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "AI 생성 실패" }, { status: 500 });
   }
 }
+
