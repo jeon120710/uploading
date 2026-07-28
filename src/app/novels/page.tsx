@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { BookOpen, Plus } from "lucide-react";
+import { BookOpen, Plus, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { AiNovelGenerator } from "@/components/AiNovelGenerator";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,8 @@ export default async function NovelsPage() {
           </h1>
           <p className="text-muted mt-1">다양한 소설을 감상하세요</p>
         </div>
-        <Link
+        <div className="flex gap-2">
+          <Link
           href="/upload?type=novel"
           className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl font-medium shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all hover:scale-105"
         >
@@ -37,6 +39,11 @@ export default async function NovelsPage() {
           소설 올리기
         </Link>
       </div>
+          </div>
+
+      <div className="mb-12">
+        <AiNovelGenerator />
+        </div>
 
       {novels.length === 0 ? (
         <div className="text-center py-20 animate-fade-in">
@@ -86,3 +93,4 @@ export default async function NovelsPage() {
     </div>
   );
 }
+
