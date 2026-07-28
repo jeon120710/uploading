@@ -11,6 +11,8 @@ model Novel {
   id          String   @id @default(cuid())
   title       String
   author      String
+  authorId    String?
+  authorUser  User?    @relation(fields: [authorId], references: [id])
   description String?
   content     String
   coverImage  String?
@@ -32,6 +34,8 @@ model Video {
   viewCount   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  uploaderId  String?
+  uploader    User?    @relation(fields: [uploaderId], references: [id])
   people      VideoPerson[]
 }
 
@@ -50,4 +54,26 @@ model VideoPerson {
   person   Person @relation(fields: [personId], references: [id], onDelete: Cascade)
 
   @@unique([videoId, personId])
+}
+
+model User {
+  id        String    @id @default(cuid())
+  studentId String    @unique
+  name      String
+  password  String
+  isAdmin   Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  novels    Novel[]
+  videos    Video[]
+  sessions  Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }

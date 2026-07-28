@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Video, Home, Upload, Settings } from "lucide-react";
+import { BookOpen, Video, Home, Upload, Settings, LogIn, UserPlus, LogOut, User } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { href: "/", label: "홈", icon: Home },
@@ -12,6 +13,7 @@ const navItems = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const { user, loading, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 glass border-b border-border">
@@ -51,24 +53,61 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link
-              href="/admin"
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                pathname === "/admin"
-                  ? "bg-foreground/10 text-foreground"
-                  : "text-foreground/40 hover:text-foreground/70 hover:bg-foreground/5"
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline">관리</span>
-            </Link>
-            <Link
-              href="/upload"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark text-white text-sm font-medium shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-200 hover:scale-105"
-            >
-              <Upload className="w-4 h-4" />
-              <span className="hidden sm:inline">업로드</span>
-            </Link>
+            {loading ? null : user ? (
+              <>
+                <Link
+                  href="/admin"
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    pathname === "/admin"
+                      ? "bg-foreground/10 text-foreground"
+                      : "text-foreground/40 hover:text-foreground/70 hover:bg-foreground/5"
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  <span className="hidden sm:inline">관리</span>
+                </Link>
+                <Link
+                  href="/upload"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark text-white text-sm font-medium shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-200 hover:scale-105"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span className="hidden sm:inline">업로드</span>
+                </Link>
+                <div className="w-px h-6 bg-border mx-1" />
+                <div className="flex items-center gap-1 text-sm text-foreground/60">
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline font-medium text-foreground/80">{user.name}</span>
+                </div>
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-medium text-foreground/40 hover:text-red-400 hover:bg-red-500/5 transition-all duration-200"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">로그아웃</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    pathname === "/login"
+                      ? "bg-primary text-white shadow-lg shadow-primary/25"
+                      : "text-foreground/60 hover:text-foreground hover:bg-foreground/5"
+                  }`}
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden sm:inline">로그인</span>
+                </Link>
+                <Link
+                  href="/signup"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-primary-dark text-white text-sm font-medium shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-200 hover:scale-105"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span className="hidden sm:inline">회원가입</span>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
