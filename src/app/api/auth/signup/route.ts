@@ -27,9 +27,34 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!password.includes("!,.,?,@%,&")) {
+  // 한글 금지
+  if (/[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(password)) {
     return NextResponse.json(
-      { error: "비밀번호에는 특수문자 !,.,?,@%,& 중 하나 이상이 포함되어야 합니다." },
+      { error: "비밀번호에는 한글을 사용할 수 없습니다." },
+      { status: 400 }
+    );
+  }
+
+  // 영문 포함
+  if (!/[a-zA-Z]/.test(password)) {
+    return NextResponse.json(
+      { error: "비밀번호에는 영문이 하나 이상 포함되어야 합니다." },
+      { status: 400 }
+    );
+  }
+
+  // 숫자 포함
+  if (!/[0-9]/.test(password)) {
+    return NextResponse.json(
+      { error: "비밀번호에는 숫자가 하나 이상 포함되어야 합니다." },
+      { status: 400 }
+    );
+  }
+
+  // 특수문자 포함
+  if (!/[!?.@%&]/.test(password)) {
+    return NextResponse.json(
+      { error: "비밀번호에는 특수문자(! . ? @ % &) 중 하나 이상이 포함되어야 합니다." },
       { status: 400 }
     );
   }
