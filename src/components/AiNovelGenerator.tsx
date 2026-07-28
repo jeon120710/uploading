@@ -61,18 +61,51 @@ export function AiNovelGenerator() {
   };
 
   if (step === "settings") {
-  return (
-      <div className="bg-card border border-border rounded-3xl p-8 shadow-xl space-y-4">
-        <h2 className="text-2xl font-bold mb-6">소설 설정</h2>
-        <input className="w-full p-3 bg-background border rounded-xl" placeholder="위치 (예: 검은 성)" onChange={(e) => setSettings({...settings, location: e.target.value})} />
-        <input className="w-full p-3 bg-background border rounded-xl" placeholder="일어날 일 (예: 기억을 잃은 소년의 각성)" onChange={(e) => setSettings({...settings, event: e.target.value})} />
-        <select className="w-full p-3 bg-background border rounded-xl" onChange={(e) => setSettings({...settings, category: e.target.value})}>
-          <option>판타지</option><option>SF</option><option>로맨스</option>
-        </select>
-        <button onClick={startWriting} className="w-full py-3 bg-accent text-white rounded-xl font-bold">생성 시작</button>
+    return (
+      <div className="bg-card border border-border rounded-3xl p-8 shadow-2xl space-y-6 animate-in fade-in zoom-in duration-300">
+        <div className="text-center space-y-2">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent">
+            소설 창조의 서
+          </h2>
+          <p className="text-muted text-sm">운명의 실타래를 어떻게 엮으시겠습니까?</p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-muted uppercase tracking-wider ml-1">배경 설정</label>
+            <input className="w-full p-4 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-accent outline-none transition-all" placeholder="예: 검은 성의 지하 감옥" onChange={(e) => setSettings({...settings, location: e.target.value})} />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-muted uppercase tracking-wider ml-1">사건의 발단</label>
+            <input className="w-full p-4 bg-background border border-border rounded-2xl focus:ring-2 focus:ring-accent outline-none transition-all" placeholder="예: 기억을 잃은 소년의 각성" onChange={(e) => setSettings({...settings, event: e.target.value})} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+             <div className="space-y-2">
+                <label className="text-xs font-bold text-muted uppercase tracking-wider ml-1">카테고리</label>
+                <select className="w-full p-4 bg-background border border-border rounded-2xl outline-none" onChange={(e) => setSettings({...settings, category: e.target.value})}>
+                  <option>판타지</option><option>SF</option><option>무협</option><option>미스테리</option>
+                </select>
+             </div>
+             <div className="space-y-2">
+                <label className="text-xs font-bold text-muted uppercase tracking-wider ml-1">세계관 컨셉</label>
+                <select className="w-full p-4 bg-background border border-border rounded-2xl outline-none" onChange={(e) => setSettings({...settings, concept: e.target.value})}>
+                  <option>중2병</option><option>다크 판타지</option><option>먼치킨</option><option>일상</option>
+                </select>
+             </div>
+          </div>
+        </div>
+
+        <button
+          onClick={startWriting}
+          className="w-full py-4 bg-gradient-to-r from-accent to-purple-600 text-white rounded-2xl font-bold shadow-lg shadow-accent/25 hover:scale-[1.02] transition-all"
+        >
+          운명 써내려가기
+        </button>
       </div>
-  );
-}
+    );
+  }
 
   return (
     <div className="bg-card border border-border rounded-3xl p-8 shadow-xl">
