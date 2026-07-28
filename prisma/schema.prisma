@@ -57,16 +57,18 @@ model VideoPerson {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  studentId String    @unique
-  name      String
-  password  String
-  isAdmin   Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  novels    Novel[]
-  videos    Video[]
-  sessions  Session[]
+  id              String    @id @default(cuid())
+  studentId       String    @unique
+  name            String
+  password        String
+  isAdmin         Boolean   @default(false)
+  aiUsageCount    Int       @default(0)
+  lastAiUsageDate DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  novels          Novel[]
+  videos          Video[]
+  sessions        Session[]
 }
 
 model Session {
@@ -77,3 +79,4 @@ model Session {
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
+

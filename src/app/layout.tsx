@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { WelcomeModal } from "@/components/WelcomeModal";
 import { AuthProvider } from "@/contexts/AuthContext";
 
@@ -34,9 +35,11 @@ export default function RootLayout({
         <AuthProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
+          <Footer />
           <WelcomeModal />
         </AuthProvider>
       </body>
     </html>
   );
 }
+
