@@ -11,6 +11,7 @@ import {
   AlertCircle,
   Save,
   Edit2,
+  Users,
 } from "lucide-react";
 import { AdminGuard } from "@/components/AdminGuard";
 
@@ -38,10 +39,18 @@ interface NovelItem {
   createdAt: string;
 }
 
+interface UserItem {
+  id: string;
+  studentId: string;
+  name: string;
+  aiUsageCount: number;
+}
+
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"videos" | "novels">("videos");
+  const [activeTab, setActiveTab] = useState<"videos" | "novels" | "users">("videos");
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [novels, setNovels] = useState<NovelItem[]>([]);
+  const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<VideoItem | NovelItem | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -50,14 +59,19 @@ export default function AdminPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [videoRes, novelRes] = await Promise.all([
+      const [videoRes, novelRes, userRes] = await Promise.all([
         fetch("/api/videos"),
         fetch("/api/novels"),
+        fetch("/api/users"),
       ]);
-      const videoData = await videoRes.json();
-      const novelData = await novelRes.json();
+      const [videoData, novelData, userData] = await Promise.all([
+        videoRes.json(),
+        novelRes.json(),
+        userRes.json(),
+      ]);
       setVideos(videoData);
       setNovels(novelData);
+      setUsers(userData);
     } catch {
       alert("데이터를 불러오지 못했습니다.");
     } finally {
@@ -153,13 +167,31 @@ export default function AdminPage() {
           <BookOpen className="w-4 h-4" />
           소설 ({novels.length})
         </button>
-      </div>
+        <button
+          onClick={() => { setActiveTab("users"); setSelectedItem(null); setIsEditing(false); }}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all ${
+            activeTab === "users"
+              ? "bg-accent text-white shadow-lg shadow-accent/25"
+              : "text-muted hover:text-foreground"
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          사용자 ({users.length})
+                    </button>
+                  </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* List */}
         <div className="lg:col-span-2 space-y-2 max-h-[600px] overflow-y-auto scrollbar-thin pr-2">
           {loading ? (
             <div className="text-center py-12 text-muted">로딩 중...</div>
+          ) : activeTab === "users" ? (
+            users.map((u) => (
+              <div key={u.id} className="p-4 bg-card border border-border rounded-xl flex justify-between">
+                <span>{u.name} ({u.studentId})</span>
+                <span className="font-bold">오늘 사용량: {u.aiUsageCount}회</span>
+              </div>
+            ))
           ) : activeTab === "videos" ? (
             videos.length === 0 ? (
               <div className="text-center py-12 text-muted">영상이 없습니다.</div>
@@ -230,8 +262,8 @@ export default function AdminPage() {
                       </span>
                       <span>{n.content.length.toLocaleString()} 자</span>
                       <span>{new Date(n.createdAt).toLocaleDateString("ko-KR")}</span>
-                    </div>
                   </div>
+    </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDelete("novel", n.id); }}
                     className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
