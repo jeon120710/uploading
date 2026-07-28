@@ -1,5 +1,5 @@
 "use client";
-
+import { useAuth } from "@/contexts/AuthContext";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -33,13 +33,17 @@ export default function UploadPage() {
   const [novelAuthor, setNovelAuthor] = useState("");
   const [novelDesc, setNovelDesc] = useState("");
   const [novelContent, setNovelContent] = useState("");
-
+  
   // Video fields
   const [videoTitle, setVideoTitle] = useState("");
   const [videoDesc, setVideoDesc] = useState("");
   const [videoDuration, setVideoDuration] = useState("");
   const [people, setPeople] = useState<string[]>([]);
   const [personInput, setPersonInput] = useState("");
+
+  // login state
+  const { user } = useAuth();
+  const [studentId, setStudentId] = useState("");
 
   const addPerson = () => {
     const trimmed = personInput.trim();
@@ -85,6 +89,12 @@ export default function UploadPage() {
       } else {
         if (!selectedFile) {
           alert("비디오 파일을 선택해주세요.");
+          setLoading(false);
+          return;
+          
+        }
+        if (!user) {
+          alert("로그인 후 사용해주세요.");
           setLoading(false);
           return;
         }

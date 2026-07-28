@@ -20,6 +20,20 @@ export async function POST(request: Request) {
     );
   }
 
+  if (password.includes(" ")) {
+    return NextResponse.json(
+      { error: "비밀번호는 공백을 포함할 수 없습니다." },
+      { status: 400 }
+    );
+  }
+
+  if (!password.includes("!,.,?,@%,&")) {
+    return NextResponse.json(
+      { error: "비밀번호에는 특수문자 !,.,?,@%,& 중 하나 이상이 포함되어야 합니다." },
+      { status: 400 }
+    );
+  }
+
   const existing = await prisma.user.findUnique({ where: { studentId } });
   if (existing) {
     return NextResponse.json(
